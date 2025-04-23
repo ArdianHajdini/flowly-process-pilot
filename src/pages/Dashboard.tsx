@@ -1,22 +1,31 @@
-
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
 import { PlusCircle, Activity, AlarmClockCheck, Users } from "lucide-react";
 import { Link } from "react-router-dom";
+import { useProcesses } from "@/hooks/useProcesses";
 
 const Dashboard = () => {
-  // Beispieldaten - später durch echte Daten aus der DB ersetzen
-  const activeProcesses = [
-    { id: 1, name: "Onboarding neuer Mitarbeiter", progress: 75, dueDate: "2025-05-01" },
-    { id: 2, name: "Quartalsabschluss", progress: 30, dueDate: "2025-04-30" },
-    { id: 3, name: "Urlaubsantrag", progress: 90, dueDate: "2025-04-25" }
-  ];
-
+  const { processes, isLoading } = useProcesses();
+  
+  const activeProcesses = processes?.filter(p => p.status === 'active') || [];
+  
   const statistics = [
-    { label: "Aktive Prozesse", value: "12", icon: Activity },
-    { label: "Fällige Aufgaben", value: "5", icon: AlarmClockCheck },
-    { label: "Team Mitglieder", value: "8", icon: Users },
+    { 
+      label: "Aktive Prozesse", 
+      value: activeProcesses.length.toString(), 
+      icon: Activity 
+    },
+    { 
+      label: "Fällige Aufgaben", 
+      value: "5", // Dies wird später mit echten Daten ersetzt
+      icon: AlarmClockCheck 
+    },
+    { 
+      label: "Team Mitglieder", 
+      value: "8", // Dies wird später mit echten Daten ersetzt
+      icon: Users 
+    },
   ];
 
   return (
@@ -31,7 +40,6 @@ const Dashboard = () => {
         </Button>
       </div>
 
-      {/* Statistik-Karten */}
       <div className="grid gap-4 md:grid-cols-3">
         {statistics.map((stat) => (
           <Card key={stat.label}>
@@ -48,51 +56,33 @@ const Dashboard = () => {
         ))}
       </div>
 
-      {/* Aktive Prozesse */}
       <Card>
         <CardHeader>
           <CardTitle>Aktive Prozesse</CardTitle>
           <CardDescription>Übersicht aller laufenden Prozesse</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="space-y-6">
-            {activeProcesses.map((process) => (
-              <div key={process.id} className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <p className="font-medium">{process.name}</p>
-                  <span className="text-sm text-muted-foreground">
-                    Fällig am {new Date(process.dueDate).toLocaleDateString('de-DE')}
-                  </span>
+          {isLoading ? (
+            <div className="text-center py-4">Lädt...</div>
+          ) : activeProcesses.length > 0 ? (
+            <div className="space-y-6">
+              {activeProcesses.map((process) => (
+                <div key={process.id} className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <p className="font-medium">{process.name}</p>
+                    <span className="text-sm text-muted-foreground">
+                      Gestartet am {new Date(process.started_at).toLocaleDateString('de-DE')}
+                    </span>
+                  </div>
+                  <Progress value={0} className="h-2" />
                 </div>
-                <Progress value={process.progress} className="h-2" />
-              </div>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Aktivitäten */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Neueste Aktivitäten</CardTitle>
-          <CardDescription>Die letzten Änderungen und Updates</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            {/* Später durch echte Aktivitätsdaten ersetzen */}
-            <div className="flex items-start space-x-4">
-              <div className="bg-primary/10 p-2 rounded-full">
-                <Activity className="h-4 w-4 text-primary" />
-              </div>
-              <div>
-                <p className="text-sm font-medium">Schritt abgeschlossen</p>
-                <p className="text-sm text-muted-foreground">
-                  Max Mustermann hat "Dokumentenprüfung" abgeschlossen
-                </p>
-                <p className="text-xs text-muted-foreground">Vor 2 Stunden</p>
-              </div>
+              ))}
             </div>
-          </div>
+          ) : (
+            <div className="text-center py-4 text-muted-foreground">
+              Keine aktiven Prozesse vorhanden
+            </div>
+          )}
         </CardContent>
       </Card>
     </div>

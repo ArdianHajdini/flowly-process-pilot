@@ -9,7 +9,181 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      process_steps: {
+        Row: {
+          assigned_to: string | null
+          completed_at: string | null
+          confirmation_data: Json | null
+          created_at: string
+          due_date: string | null
+          id: string
+          process_id: string
+          status: string
+          template_step_id: string
+          updated_at: string
+          upload_urls: string[] | null
+        }
+        Insert: {
+          assigned_to?: string | null
+          completed_at?: string | null
+          confirmation_data?: Json | null
+          created_at?: string
+          due_date?: string | null
+          id?: string
+          process_id: string
+          status?: string
+          template_step_id: string
+          updated_at?: string
+          upload_urls?: string[] | null
+        }
+        Update: {
+          assigned_to?: string | null
+          completed_at?: string | null
+          confirmation_data?: Json | null
+          created_at?: string
+          due_date?: string | null
+          id?: string
+          process_id?: string
+          status?: string
+          template_step_id?: string
+          updated_at?: string
+          upload_urls?: string[] | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "process_steps_process_id_fkey"
+            columns: ["process_id"]
+            isOneToOne: false
+            referencedRelation: "processes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "process_steps_template_step_id_fkey"
+            columns: ["template_step_id"]
+            isOneToOne: false
+            referencedRelation: "template_steps"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      process_templates: {
+        Row: {
+          created_at: string
+          created_by: string
+          description: string | null
+          id: string
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          description?: string | null
+          id?: string
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          description?: string | null
+          id?: string
+          name?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      processes: {
+        Row: {
+          completed_at: string | null
+          created_by: string
+          id: string
+          name: string
+          started_at: string
+          status: string
+          template_id: string
+          updated_at: string
+        }
+        Insert: {
+          completed_at?: string | null
+          created_by: string
+          id?: string
+          name: string
+          started_at?: string
+          status?: string
+          template_id: string
+          updated_at?: string
+        }
+        Update: {
+          completed_at?: string | null
+          created_by?: string
+          id?: string
+          name?: string
+          started_at?: string
+          status?: string
+          template_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "processes_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "process_templates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      template_steps: {
+        Row: {
+          assignee_role: string
+          confirmation_type: string | null
+          created_at: string
+          description: string | null
+          id: string
+          needs_confirmation: boolean
+          needs_upload: boolean
+          order_index: number
+          template_id: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          assignee_role: string
+          confirmation_type?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          needs_confirmation?: boolean
+          needs_upload?: boolean
+          order_index: number
+          template_id: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          assignee_role?: string
+          confirmation_type?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          needs_confirmation?: boolean
+          needs_upload?: boolean
+          order_index?: number
+          template_id?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "template_steps_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "process_templates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
