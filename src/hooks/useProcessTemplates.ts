@@ -3,10 +3,12 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import type { ProcessTemplate, TemplateStep } from '@/types/process';
 import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/contexts/AuthContext';
 
 export const useProcessTemplates = () => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { user } = useAuth();
 
   const { data: templates, isLoading } = useQuery({
     queryKey: ['process_templates'],
@@ -26,9 +28,11 @@ export const useProcessTemplates = () => {
       description: string | null;
       steps: Omit<TemplateStep, 'id' | 'template_id' | 'created_at' | 'updated_at'>[];
     }) => {
+      if (!user?.id) throw new Error('Benutzer nicht angemeldet');
+
       const { data: template, error: templateError } = await supabase
         .from('process_templates')
-        .insert([{ name, description }])
+        .insert([{ name, description, created_by: user.id }])
         .select()
         .single();
 

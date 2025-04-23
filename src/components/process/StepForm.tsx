@@ -112,9 +112,8 @@ export const StepForm = ({ step, index, onUpdate, onRemove }: StepFormProps) => 
                 <Select
                   value={step.confirmation_type || "checkbox"}
                   onValueChange={value => onUpdate(step.id, "confirmation_type", value)}
-                  className="mt-2"
                 >
-                  <SelectTrigger>
+                  <SelectTrigger className="mt-2">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
