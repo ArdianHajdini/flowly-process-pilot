@@ -1,7 +1,15 @@
-
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+
+export type TeamMember = {
+  id: string;
+  first_name: string | null;
+  last_name: string | null;
+  created_at: string | null;
+  updated_at: string | null;
+  user_roles: { role: 'admin' | 'manager' | 'employee' }[];
+}
 
 export const useTeam = () => {
   const { toast } = useToast();
@@ -19,7 +27,7 @@ export const useTeam = () => {
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      return profiles;
+      return profiles as TeamMember[];
     },
   });
 
