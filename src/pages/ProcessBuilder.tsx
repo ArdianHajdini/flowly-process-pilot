@@ -1,6 +1,5 @@
-
 import { useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -9,6 +8,7 @@ import { PlusCircle, Save } from "lucide-react";
 import { StepForm } from "@/components/process/StepForm";
 import { useProcessTemplates } from "@/hooks/useProcessTemplates";
 import { cn } from "@/lib/utils";
+import { DragDropContext, Droppable } from "react-beautiful-dnd";
 
 interface ProcessStep {
   id: string;
@@ -83,6 +83,16 @@ const ProcessBuilder = () => {
     });
   };
 
+  const onDragEnd = (result: any) => {
+    if (!result.destination) return;
+
+    const newSteps = Array.from(steps);
+    const [reorderedStep] = newSteps.splice(result.source.index, 1);
+    newSteps.splice(result.destination.index, 0, reorderedStep);
+
+    setSteps(newSteps);
+  };
+
   return (
     <div className="space-y-6 bg-gradient-to-br from-[#f0f4f8] to-[#e6eaf3] min-h-screen p-8">
       <div className="flex items-center justify-between mb-6">
@@ -131,30 +141,41 @@ const ProcessBuilder = () => {
               />
             </div>
 
-            <div className="space-y-6">
-              {steps.map((step, index) => (
-                <StepForm
-                  key={step.id}
-                  step={step}
-                  index={index}
-                  onUpdate={updateStep}
-                  onRemove={removeStep}
-                />
-              ))}
-
-              <Button 
-                variant="outline" 
-                className={cn(
-                  "w-full py-6 border-dashed flex items-center gap-2",
-                  "border-[#9b87f5]/50 text-[#6E59A5] hover:bg-[#9b87f5]/10",
-                  "transition-colors duration-300"
+            <DragDropContext onDragEnd={onDragEnd}>
+              <Droppable droppableId="steps">
+                {(provided) => (
+                  <div 
+                    ref={provided.innerRef} 
+                    {...provided.droppableProps}
+                    className="space-y-6"
+                  >
+                    {steps.map((step, index) => (
+                      <StepForm
+                        key={step.id}
+                        step={step}
+                        index={index}
+                        onUpdate={updateStep}
+                        onRemove={removeStep}
+                      />
+                    ))}
+                    {provided.placeholder}
+                  </div>
                 )}
-                onClick={addStep}
-              >
-                <PlusCircle size={18} />
-                Schritt hinzufügen
-              </Button>
-            </div>
+              </Droppable>
+            </DragDropContext>
+
+            <Button 
+              variant="outline" 
+              className={cn(
+                "w-full py-6 border-dashed flex items-center gap-2",
+                "border-[#9b87f5]/50 text-[#6E59A5] hover:bg-[#9b87f5]/10",
+                "transition-colors duration-300"
+              )}
+              onClick={addStep}
+            >
+              <PlusCircle size={18} />
+              Schritt hinzufügen
+            </Button>
           </div>
         </CardContent>
       </Card>

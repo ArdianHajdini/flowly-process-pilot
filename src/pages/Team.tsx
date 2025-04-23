@@ -1,121 +1,113 @@
 
-import { Card, CardContent } from "@/components/ui/card";
-import { Avatar } from "@/components/ui/avatar";
-import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Search, UserPlus } from "lucide-react";
+import { Card } from "@/components/ui/card";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import { Trash2, UserPlus } from "lucide-react";
+import { useTeam } from "@/hooks/useTeam";
 
 const Team = () => {
-  // Mock data
-  const teamMembers = [
-    { id: 1, name: "Max Mustermann", email: "max@firma.de", department: "IT", role: "Admin" },
-    { id: 2, name: "Anna Schmidt", email: "anna@firma.de", department: "Finanzen", role: "Leitung" },
-    { id: 3, name: "Tobias Müller", email: "tobias@firma.de", department: "Marketing", role: "Bearbeiter" },
-    { id: 4, name: "Laura Weber", email: "laura@firma.de", department: "HR", role: "Leitung" },
-    { id: 5, name: "Michael Wolf", email: "michael@firma.de", department: "Verkauf", role: "Bearbeiter" },
-  ];
+  const { teamMembers, isLoading, updateRole, removeTeamMember } = useTeam();
+
+  const handleRoleChange = (userId: string, newRole: 'admin' | 'manager' | 'employee') => {
+    updateRole.mutate({ userId, role: newRole });
+  };
+
+  const handleRemoveMember = (userId: string) => {
+    removeTeamMember.mutate(userId);
+  };
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold tracking-tight">Team</h1>
-        <Button className="gap-2">
-          <UserPlus size={16} />
-          Teammitglied hinzufügen
+    <div className="container mx-auto p-8">
+      <div className="flex items-center justify-between mb-8">
+        <h1 className="text-3xl font-bold tracking-tight text-gray-900">Team</h1>
+        <Button
+          className="bg-[#6E59A5] hover:bg-[#5A4982] text-white transition-colors"
+        >
+          <UserPlus className="mr-2 h-4 w-4" />
+          Mitglied einladen
         </Button>
       </div>
 
-      <div className="flex flex-wrap gap-4">
-        <div className="flex-1 min-w-[200px]">
-          <div className="relative">
-            <Search size={16} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground" />
-            <Input
-              placeholder="Suche nach Namen, E-Mail..."
-              className="w-full pl-10"
-            />
-          </div>
-        </div>
-        <div>
-          <Select>
-            <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder="Abteilung" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">Alle Abteilungen</SelectItem>
-              <SelectItem value="it">IT</SelectItem>
-              <SelectItem value="finance">Finanzen</SelectItem>
-              <SelectItem value="marketing">Marketing</SelectItem>
-              <SelectItem value="hr">HR</SelectItem>
-              <SelectItem value="sales">Verkauf</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-        <div>
-          <Select>
-            <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder="Rolle" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">Alle Rollen</SelectItem>
-              <SelectItem value="admin">Admin</SelectItem>
-              <SelectItem value="manager">Leitung</SelectItem>
-              <SelectItem value="user">Bearbeiter</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-      </div>
-
-      <Card>
-        <CardContent className="p-0">
-          <div className="rounded-md border">
-            <div className="grid grid-cols-12 py-3 px-4 text-sm font-medium text-muted-foreground border-b">
-              <div className="col-span-4">Name</div>
-              <div className="col-span-3">E-Mail</div>
-              <div className="col-span-2">Abteilung</div>
-              <div className="col-span-2">Rolle</div>
-              <div className="col-span-1"></div>
-            </div>
-            
-            {teamMembers.map((member) => (
-              <div 
-                key={member.id} 
-                className="grid grid-cols-12 py-3 px-4 border-b last:border-0 items-center hover:bg-muted/30 transition-colors cursor-pointer"
-              >
-                <div className="col-span-4 flex items-center gap-3">
-                  <Avatar className="w-8 h-8">
-                    <div className="bg-primary/10 text-primary font-medium w-full h-full flex items-center justify-center">
-                      {member.name.split(" ").map(n => n[0]).join("")}
-                    </div>
-                  </Avatar>
-                  <div className="font-medium">{member.name}</div>
+      {isLoading ? (
+        <div>Lade Team...</div>
+      ) : (
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          {teamMembers?.map((member) => (
+            <Card key={member.id} className="p-6 space-y-4">
+              <div className="flex items-start justify-between">
+                <div>
+                  <h3 className="font-medium">
+                    {member.first_name} {member.last_name}
+                  </h3>
                 </div>
-                <div className="col-span-3 text-muted-foreground">{member.email}</div>
-                <div className="col-span-2">{member.department}</div>
-                <div className="col-span-2">
-                  <div className={cn(
-                    "inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium",
-                    member.role === "Admin" ? "bg-primary/10 text-primary" :
-                    member.role === "Leitung" ? "bg-brand-100 text-brand-800" :
-                    "bg-secondary text-secondary-foreground"
-                  )}>
-                    {member.role}
-                  </div>
-                </div>
-                <div className="col-span-1 text-right">
-                  <Button variant="ghost" size="sm">Bearbeiten</Button>
-                </div>
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <Button 
+                      variant="outline" 
+                      size="icon"
+                      className="text-red-500 hover:bg-red-50 border-red-200/50"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>Teammitglied entfernen?</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        Diese Aktion kann nicht rückgängig gemacht werden. Das Teammitglied verliert den Zugriff auf das System.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>Abbrechen</AlertDialogCancel>
+                      <AlertDialogAction
+                        onClick={() => handleRemoveMember(member.id)}
+                        className="bg-red-500 hover:bg-red-600"
+                      >
+                        Entfernen
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
               </div>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
+
+              <Select
+                value={member.user_roles?.[0]?.role || 'employee'}
+                onValueChange={(value: 'admin' | 'manager' | 'employee') => 
+                  handleRoleChange(member.id, value)
+                }
+              >
+                <SelectTrigger className="w-full">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="admin">Admin</SelectItem>
+                  <SelectItem value="manager">Leitung</SelectItem>
+                  <SelectItem value="employee">Mitarbeiter</SelectItem>
+                </SelectContent>
+              </Select>
+            </Card>
+          ))}
+        </div>
+      )}
     </div>
   );
 };
 
 export default Team;
-
-function cn(...classes: (string | boolean | undefined)[]) {
-  return classes.filter(Boolean).join(' ');
-}
