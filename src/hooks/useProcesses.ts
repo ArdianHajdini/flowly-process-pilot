@@ -1,7 +1,7 @@
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import type { Process, ProcessTemplate } from '@/types/process';
+import type { Process, ProcessTemplate, NewProcess } from '@/types/process';
 
 export const useProcesses = () => {
   const queryClient = useQueryClient();
@@ -33,7 +33,7 @@ export const useProcesses = () => {
   });
 
   const createProcess = useMutation({
-    mutationFn: async (newProcess: Partial<Process>) => {
+    mutationFn: async (newProcess: NewProcess) => {
       const { data, error } = await supabase
         .from('processes')
         .insert([newProcess])

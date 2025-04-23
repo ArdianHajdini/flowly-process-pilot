@@ -33,6 +33,17 @@ export type Process = {
   updated_at: string;
 };
 
+// Neue Typen für INSERT und UPDATE Operationen
+export type NewProcess = {
+  template_id: string;
+  name: string;
+  created_by: string;
+  status?: 'active' | 'completed' | 'cancelled';
+  started_at?: string;
+  completed_at?: string | null;
+  updated_at?: string;
+};
+
 export type ProcessStep = {
   id: string;
   process_id: string;
