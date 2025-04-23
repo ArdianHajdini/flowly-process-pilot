@@ -2,7 +2,7 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
-import { PlusCircle, Activity, ClockCheck, Users } from "lucide-react";
+import { PlusCircle, Activity, AlarmClockCheck, Users } from "lucide-react";
 import { Link } from "react-router-dom";
 
 const Dashboard = () => {
@@ -15,7 +15,7 @@ const Dashboard = () => {
 
   const statistics = [
     { label: "Aktive Prozesse", value: "12", icon: Activity },
-    { label: "Fällige Aufgaben", value: "5", icon: ClockCheck },
+    { label: "Fällige Aufgaben", value: "5", icon: AlarmClockCheck },
     { label: "Team Mitglieder", value: "8", icon: Users },
   ];
 
