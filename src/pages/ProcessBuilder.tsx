@@ -5,51 +5,47 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Separator } from "@/components/ui/separator";
-import { Trash2, GripVertical, PlusCircle, Save, Clock, User, FileText, CheckSquare } from "lucide-react";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { PlusCircle, Save } from "lucide-react";
+import { StepForm } from "@/components/process/StepForm";
+import { useProcessTemplates } from "@/hooks/useProcessTemplates";
 
 interface ProcessStep {
   id: string;
   title: string;
   description: string;
-  assignee: string;
-  dueDate?: string;
-  relativeDueDate?: {
-    relatedToStep: string;
-    hours: number;
-  };
-  needsUpload: boolean;
-  needsConfirmation: boolean;
-  confirmationType: "checkbox" | "text";
-  notifyOnLate?: string[];
+  assignee_role: string;
+  needs_upload: boolean;
+  needs_confirmation: boolean;
+  confirmation_type: "checkbox" | "text" | null;
 }
 
 const ProcessBuilder = () => {
   const [processName, setProcessName] = useState("");
+  const [processDescription, setProcessDescription] = useState("");
   const [steps, setSteps] = useState<ProcessStep[]>([
     {
       id: "step-1",
-      title: "Schritt 1",
-      description: "Beschreibung für den ersten Schritt",
-      assignee: "manager",
-      needsUpload: true,
-      needsConfirmation: true,
-      confirmationType: "checkbox",
+      title: "Neuer Schritt",
+      description: "",
+      assignee_role: "employee",
+      needs_upload: false,
+      needs_confirmation: false,
+      confirmation_type: null,
     }
   ]);
+
+  const { saveTemplate } = useProcessTemplates();
 
   const addStep = () => {
     const newStepId = `step-${steps.length + 1}`;
     const newStep: ProcessStep = {
       id: newStepId,
-      title: `Schritt ${steps.length + 1}`,
+      title: "Neuer Schritt",
       description: "",
-      assignee: "manager",
-      needsUpload: false,
-      needsConfirmation: false,
-      confirmationType: "checkbox",
+      assignee_role: "employee",
+      needs_upload: false,
+      needs_confirmation: false,
+      confirmation_type: null,
     };
     
     setSteps([...steps, newStep]);
@@ -57,23 +53,6 @@ const ProcessBuilder = () => {
 
   const removeStep = (id: string) => {
     setSteps(steps.filter(step => step.id !== id));
-  };
-
-  // This would be expanded for a real drag-and-drop implementation
-  // Here we just show the UI elements that would be used
-  const moveStep = (index: number, direction: "up" | "down") => {
-    if (
-      (direction === "up" && index === 0) ||
-      (direction === "down" && index === steps.length - 1)
-    ) {
-      return;
-    }
-
-    const newSteps = [...steps];
-    const targetIndex = direction === "up" ? index - 1 : index + 1;
-    [newSteps[index], newSteps[targetIndex]] = [newSteps[targetIndex], newSteps[index]];
-    
-    setSteps(newSteps);
   };
 
   const updateStep = (id: string, field: keyof ProcessStep, value: any) => {
@@ -85,9 +64,22 @@ const ProcessBuilder = () => {
     }));
   };
 
-  const saveProcess = () => {
-    // Would connect to backend in real application
-    alert(`Prozess "${processName}" mit ${steps.length} Schritten gespeichert`);
+  const handleSave = async () => {
+    const templateSteps = steps.map((step, index) => ({
+      title: step.title,
+      description: step.description,
+      assignee_role: step.assignee_role,
+      needs_upload: step.needs_upload,
+      needs_confirmation: step.needs_confirmation,
+      confirmation_type: step.confirmation_type,
+      order_index: index,
+    }));
+
+    await saveTemplate.mutateAsync({
+      name: processName,
+      description: processDescription || null,
+      steps: templateSteps,
+    });
   };
 
   return (
@@ -95,10 +87,9 @@ const ProcessBuilder = () => {
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold tracking-tight">Prozess-Builder</h1>
         <div className="flex gap-2">
-          <Button variant="outline">Als Vorlage speichern</Button>
-          <Button onClick={saveProcess}>
+          <Button onClick={handleSave} disabled={saveTemplate.isPending}>
             <Save className="mr-2 h-4 w-4" />
-            Prozess speichern
+            Als Vorlage speichern
           </Button>
         </div>
       </div>
@@ -117,160 +108,27 @@ const ProcessBuilder = () => {
               />
             </div>
 
-            <Separator className="my-6" />
+            <div>
+              <Label htmlFor="process-description">Beschreibung</Label>
+              <Textarea
+                id="process-description"
+                value={processDescription}
+                onChange={e => setProcessDescription(e.target.value)}
+                placeholder="Beschreiben Sie den Prozess..."
+                className="mt-1"
+                rows={3}
+              />
+            </div>
 
             <div className="space-y-6">
               {steps.map((step, index) => (
-                <div key={step.id} className="border rounded-lg p-4 space-y-4 bg-white">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <div className="cursor-move text-muted-foreground hover:text-foreground">
-                        <GripVertical size={20} />
-                      </div>
-                      <h3 className="font-medium">Schritt {index + 1}</h3>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => removeStep(step.id)}
-                      >
-                        <Trash2 size={16} />
-                      </Button>
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-1 gap-4">
-                    <div>
-                      <Label htmlFor={`${step.id}-title`}>Titel</Label>
-                      <Input
-                        id={`${step.id}-title`}
-                        value={step.title}
-                        onChange={e => updateStep(step.id, "title", e.target.value)}
-                        className="mt-1"
-                      />
-                    </div>
-
-                    <div>
-                      <Label htmlFor={`${step.id}-description`}>Beschreibung</Label>
-                      <Textarea
-                        id={`${step.id}-description`}
-                        value={step.description}
-                        onChange={e => updateStep(step.id, "description", e.target.value)}
-                        className="mt-1"
-                        rows={3}
-                      />
-                    </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div>
-                        <Label htmlFor={`${step.id}-assignee`} className="flex items-center gap-2">
-                          <User size={16} />
-                          Zuständig
-                        </Label>
-                        <Select
-                          value={step.assignee}
-                          onValueChange={value => updateStep(step.id, "assignee", value)}
-                        >
-                          <SelectTrigger className="mt-1">
-                            <SelectValue placeholder="Rolle auswählen" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="admin">Admin</SelectItem>
-                            <SelectItem value="manager">Leitung</SelectItem>
-                            <SelectItem value="employee">Mitarbeiter</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-
-                      <div>
-                        <Label htmlFor={`${step.id}-due-date`} className="flex items-center gap-2">
-                          <Clock size={16} />
-                          Fälligkeitsdatum
-                        </Label>
-                        <div className="flex gap-2 items-center mt-1">
-                          <Select 
-                            defaultValue="fixed"
-                            onValueChange={() => {}}
-                          >
-                            <SelectTrigger>
-                              <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="fixed">Festes Datum</SelectItem>
-                              <SelectItem value="relative">Relativ zum vorherigen Schritt</SelectItem>
-                            </SelectContent>
-                          </Select>
-
-                          <Input 
-                            type="date" 
-                            className="flex-1"
-                          />
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div className="flex items-start gap-2">
-                        <div className="pt-1">
-                          <input 
-                            type="checkbox" 
-                            id={`${step.id}-needs-upload`}
-                            checked={step.needsUpload}
-                            onChange={e => updateStep(step.id, "needsUpload", e.target.checked)}
-                            className="rounded"
-                          />
-                        </div>
-                        <div>
-                          <Label htmlFor={`${step.id}-needs-upload`} className="flex items-center gap-2">
-                            <FileText size={16} />
-                            Dateiupload erlauben
-                          </Label>
-                          <p className="text-sm text-muted-foreground">
-                            Benutzer können Dokumente hochladen
-                          </p>
-                        </div>
-                      </div>
-
-                      <div className="flex items-start gap-2">
-                        <div className="pt-1">
-                          <input 
-                            type="checkbox" 
-                            id={`${step.id}-needs-confirmation`}
-                            checked={step.needsConfirmation}
-                            onChange={e => updateStep(step.id, "needsConfirmation", e.target.checked)}
-                            className="rounded"
-                          />
-                        </div>
-                        <div>
-                          <Label htmlFor={`${step.id}-needs-confirmation`} className="flex items-center gap-2">
-                            <CheckSquare size={16} />
-                            Bestätigung benötigt
-                          </Label>
-                          <p className="text-sm text-muted-foreground">
-                            Benutzer müssen den Abschluss bestätigen
-                          </p>
-                          {step.needsConfirmation && (
-                            <div className="mt-2">
-                              <Select
-                                value={step.confirmationType}
-                                onValueChange={value => updateStep(step.id, "confirmationType", value)}
-                              >
-                                <SelectTrigger>
-                                  <SelectValue />
-                                </SelectTrigger>
-                                <SelectContent>
-                                  <SelectItem value="checkbox">Checkbox</SelectItem>
-                                  <SelectItem value="text">Textfeld</SelectItem>
-                                </SelectContent>
-                              </Select>
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
+                <StepForm
+                  key={step.id}
+                  step={step}
+                  index={index}
+                  onUpdate={updateStep}
+                  onRemove={removeStep}
+                />
               ))}
 
               <Button 
