@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -13,6 +12,7 @@ import Tasks from "./pages/Tasks";
 import Team from "./pages/Team";
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
+import Teams from "./pages/Teams";
 
 const queryClient = new QueryClient();
 
@@ -50,6 +50,13 @@ const App = () => (
               <PrivateRoute>
                 <MainLayout>
                   <Team />
+                </MainLayout>
+              </PrivateRoute>
+            } />
+            <Route path="/teams" element={
+              <PrivateRoute>
+                <MainLayout>
+                  <Teams />
                 </MainLayout>
               </PrivateRoute>
             } />

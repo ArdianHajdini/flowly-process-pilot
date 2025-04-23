@@ -173,6 +173,7 @@ export type Database = {
           pdf_export_url: string | null
           started_at: string
           status: string
+          team_id: string | null
           template_id: string
           updated_at: string
         }
@@ -185,6 +186,7 @@ export type Database = {
           pdf_export_url?: string | null
           started_at?: string
           status?: string
+          team_id?: string | null
           template_id: string
           updated_at?: string
         }
@@ -197,10 +199,18 @@ export type Database = {
           pdf_export_url?: string | null
           started_at?: string
           status?: string
+          team_id?: string | null
           template_id?: string
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "processes_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "teams"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "processes_template_id_fkey"
             columns: ["template_id"]
@@ -230,6 +240,68 @@ export type Database = {
           first_name?: string | null
           id?: string
           last_name?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      team_members: {
+        Row: {
+          created_at: string | null
+          id: string
+          role: string
+          team_id: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          role: string
+          team_id: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          role?: string
+          team_id?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "team_members_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "teams"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      teams: {
+        Row: {
+          created_at: string | null
+          created_by: string
+          description: string | null
+          id: string
+          name: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          created_by: string
+          description?: string | null
+          id?: string
+          name: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          created_by?: string
+          description?: string | null
+          id?: string
+          name?: string
           updated_at?: string | null
         }
         Relationships: []

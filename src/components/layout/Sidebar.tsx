@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { NavLink } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -10,7 +9,8 @@ import {
   Users, 
   Settings, 
   ChevronLeft, 
-  ChevronRight 
+  ChevronRight, 
+  Building2 
 } from "lucide-react";
 
 const Sidebar = () => {
@@ -21,6 +21,11 @@ const Sidebar = () => {
       label: "Dashboard", 
       icon: LayoutDashboard, 
       href: "/" 
+    },
+    { 
+      label: "Teams", 
+      icon: Building2, 
+      href: "/teams" 
     },
     { 
       label: "Prozess-Builder", 
