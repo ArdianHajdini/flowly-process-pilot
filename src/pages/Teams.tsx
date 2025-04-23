@@ -28,7 +28,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { useTeams } from "@/hooks/useTeams";
+import { useTeams, TeamMember } from "@/hooks/useTeams";
 import { useTeam } from "@/hooks/useTeam";
 import { Building2, Plus, UserPlus } from "lucide-react";
 

@@ -2,6 +2,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/contexts/AuthContext'; 
 
 export type Team = {
   id: string;
@@ -28,6 +29,8 @@ export type TeamMember = {
 export const useTeams = () => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { session } = useAuth();
+  const userId = session?.user?.id;
 
   const { data: teams, isLoading: isLoadingTeams } = useQuery({
     queryKey: ['teams'],
@@ -42,27 +45,57 @@ export const useTeams = () => {
     },
   });
 
+  // Getrennte Abfrage für Team-Mitglieder und Profile
   const { data: teamMembers, isLoading: isLoadingMembers } = useQuery({
     queryKey: ['team-members'],
     queryFn: async () => {
-      const { data, error } = await supabase
+      // Team-Mitglieder abrufen
+      const { data: membersData, error: membersError } = await supabase
         .from('team_members')
-        .select(`
-          *,
-          profile:profiles(first_name, last_name)
-        `)
+        .select('*')
         .order('created_at');
+      
+      if (membersError) throw membersError;
 
-      if (error) throw error;
-      return data as TeamMember[];
+      // Profile für alle Team-Mitglieder abrufen
+      const userIds = membersData.map(member => member.user_id);
+      const { data: profilesData, error: profilesError } = await supabase
+        .from('profiles')
+        .select('id, first_name, last_name')
+        .in('id', userIds);
+      
+      if (profilesError) throw profilesError;
+
+      // Kombination von Mitgliedsdaten mit Profildaten
+      const enrichedMembers = membersData.map(member => {
+        const profile = profilesData.find(p => p.id === member.user_id);
+        return {
+          ...member,
+          profile: profile ? {
+            first_name: profile.first_name,
+            last_name: profile.last_name
+          } : {
+            first_name: null,
+            last_name: null
+          }
+        };
+      });
+
+      return enrichedMembers as TeamMember[];
     },
   });
 
   const createTeam = useMutation({
     mutationFn: async ({ name, description }: { name: string; description?: string }) => {
+      if (!userId) throw new Error("Benutzer nicht authentifiziert");
+      
       const { data, error } = await supabase
         .from('teams')
-        .insert([{ name, description }])
+        .insert([{ 
+          name, 
+          description, 
+          created_by: userId 
+        }])
         .select()
         .single();
 
