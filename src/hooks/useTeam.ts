@@ -1,3 +1,4 @@
+
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -21,10 +22,13 @@ export const useTeam = () => {
       const { data: profiles, error } = await supabase
         .from('profiles')
         .select(`
-          *,
-          user_roles(role)
-        `)
-        .order('created_at', { ascending: false });
+          id,
+          first_name,
+          last_name,
+          created_at,
+          updated_at,
+          user_roles:user_roles(role)
+        `);
 
       if (error) throw error;
       return profiles as TeamMember[];

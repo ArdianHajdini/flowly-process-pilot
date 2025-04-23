@@ -9,14 +9,69 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      notifications: {
+        Row: {
+          created_at: string | null
+          id: string
+          is_read: boolean | null
+          message: string
+          process_id: string | null
+          step_id: string | null
+          title: string
+          type: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          is_read?: boolean | null
+          message: string
+          process_id?: string | null
+          step_id?: string | null
+          title: string
+          type: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          is_read?: boolean | null
+          message?: string
+          process_id?: string | null
+          step_id?: string | null
+          title?: string
+          type?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notifications_process_id_fkey"
+            columns: ["process_id"]
+            isOneToOne: false
+            referencedRelation: "processes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notifications_step_id_fkey"
+            columns: ["step_id"]
+            isOneToOne: false
+            referencedRelation: "process_steps"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       process_steps: {
         Row: {
           assigned_to: string | null
           completed_at: string | null
           confirmation_data: Json | null
           created_at: string
+          deadline_hours: number | null
+          deadline_reference_step_id: string | null
+          deadline_type: string | null
           due_date: string | null
           id: string
+          is_overdue: boolean | null
           process_id: string
           status: string
           template_step_id: string
@@ -28,8 +83,12 @@ export type Database = {
           completed_at?: string | null
           confirmation_data?: Json | null
           created_at?: string
+          deadline_hours?: number | null
+          deadline_reference_step_id?: string | null
+          deadline_type?: string | null
           due_date?: string | null
           id?: string
+          is_overdue?: boolean | null
           process_id: string
           status?: string
           template_step_id: string
@@ -41,8 +100,12 @@ export type Database = {
           completed_at?: string | null
           confirmation_data?: Json | null
           created_at?: string
+          deadline_hours?: number | null
+          deadline_reference_step_id?: string | null
+          deadline_type?: string | null
           due_date?: string | null
           id?: string
+          is_overdue?: boolean | null
           process_id?: string
           status?: string
           template_step_id?: string
@@ -50,6 +113,13 @@ export type Database = {
           upload_urls?: string[] | null
         }
         Relationships: [
+          {
+            foreignKeyName: "process_steps_deadline_reference_step_id_fkey"
+            columns: ["deadline_reference_step_id"]
+            isOneToOne: false
+            referencedRelation: "process_steps"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "process_steps_process_id_fkey"
             columns: ["process_id"]
@@ -96,9 +166,11 @@ export type Database = {
       processes: {
         Row: {
           completed_at: string | null
+          completion_notes: string | null
           created_by: string
           id: string
           name: string
+          pdf_export_url: string | null
           started_at: string
           status: string
           template_id: string
@@ -106,9 +178,11 @@ export type Database = {
         }
         Insert: {
           completed_at?: string | null
+          completion_notes?: string | null
           created_by: string
           id?: string
           name: string
+          pdf_export_url?: string | null
           started_at?: string
           status?: string
           template_id: string
@@ -116,9 +190,11 @@ export type Database = {
         }
         Update: {
           completed_at?: string | null
+          completion_notes?: string | null
           created_by?: string
           id?: string
           name?: string
+          pdf_export_url?: string | null
           started_at?: string
           status?: string
           template_id?: string
