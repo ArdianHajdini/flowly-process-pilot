@@ -1,6 +1,6 @@
 
 import { useState } from "react";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { PlusCircle, Save } from "lucide-react";
 import { StepForm } from "@/components/process/StepForm";
 import { useProcessTemplates } from "@/hooks/useProcessTemplates";
+import { cn } from "@/lib/utils";
 
 interface ProcessStep {
   id: string;
@@ -83,39 +84,49 @@ const ProcessBuilder = () => {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold tracking-tight">Prozess-Builder</h1>
+    <div className="space-y-6 bg-gradient-to-br from-[#f0f4f8] to-[#e6eaf3] min-h-screen p-8">
+      <div className="flex items-center justify-between mb-6">
+        <h1 className="text-3xl font-bold tracking-tight text-gray-800">Prozess-Builder</h1>
         <div className="flex gap-2">
-          <Button onClick={handleSave} disabled={saveTemplate.isPending}>
+          <Button 
+            onClick={handleSave} 
+            disabled={saveTemplate.isPending}
+            className="bg-[#6E59A5] hover:bg-[#5A4982] text-white transition-colors"
+          >
             <Save className="mr-2 h-4 w-4" />
             Als Vorlage speichern
           </Button>
         </div>
       </div>
 
-      <Card>
+      <Card className="bg-white/80 backdrop-blur-md shadow-lg border-none">
         <CardContent className="pt-6">
           <div className="space-y-4 max-w-3xl mx-auto">
             <div>
-              <Label htmlFor="process-name">Prozessname</Label>
+              <Label htmlFor="process-name" className="text-gray-700">Prozessname</Label>
               <Input
                 id="process-name"
                 value={processName}
                 onChange={e => setProcessName(e.target.value)}
                 placeholder="z.B. Onboarding neuer Mitarbeiter"
-                className="mt-1"
+                className={cn(
+                  "mt-1 border-[#9b87f5]/50 focus:border-[#9b87f5] focus:ring-[#9b87f5]/50",
+                  "transition-colors duration-300"
+                )}
               />
             </div>
 
             <div>
-              <Label htmlFor="process-description">Beschreibung</Label>
+              <Label htmlFor="process-description" className="text-gray-700">Beschreibung</Label>
               <Textarea
                 id="process-description"
                 value={processDescription}
                 onChange={e => setProcessDescription(e.target.value)}
                 placeholder="Beschreiben Sie den Prozess..."
-                className="mt-1"
+                className={cn(
+                  "mt-1 border-[#9b87f5]/50 focus:border-[#9b87f5] focus:ring-[#9b87f5]/50",
+                  "transition-colors duration-300"
+                )}
                 rows={3}
               />
             </div>
@@ -133,7 +144,11 @@ const ProcessBuilder = () => {
 
               <Button 
                 variant="outline" 
-                className="w-full py-6 border-dashed flex items-center gap-2"
+                className={cn(
+                  "w-full py-6 border-dashed flex items-center gap-2",
+                  "border-[#9b87f5]/50 text-[#6E59A5] hover:bg-[#9b87f5]/10",
+                  "transition-colors duration-300"
+                )}
                 onClick={addStep}
               >
                 <PlusCircle size={18} />

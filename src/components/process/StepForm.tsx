@@ -1,4 +1,3 @@
-
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -6,6 +5,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Checkbox } from "@/components/ui/checkbox";
 import { GripVertical, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
 interface ProcessStep {
   id: string;
@@ -26,18 +26,26 @@ interface StepFormProps {
 
 export const StepForm = ({ step, index, onUpdate, onRemove }: StepFormProps) => {
   return (
-    <div className="border rounded-lg p-4 space-y-4 bg-white">
+    <div 
+      className={cn(
+        "border rounded-lg p-4 space-y-4",
+        "bg-gradient-to-br from-white/80 to-[#f0f4f8]/50",
+        "shadow-sm hover:shadow-md transition-shadow duration-300",
+        "border-[#9b87f5]/30 hover:border-[#9b87f5]/50"
+      )}
+    >
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <div className="cursor-move text-muted-foreground hover:text-foreground">
+          <div className="cursor-move text-[#6E59A5]/70 hover:text-[#6E59A5]">
             <GripVertical size={20} />
           </div>
-          <h3 className="font-medium">Schritt {index + 1}</h3>
+          <h3 className="font-medium text-gray-700">Schritt {index + 1}</h3>
         </div>
         <Button
           variant="outline"
           size="sm"
           onClick={() => onRemove(step.id)}
+          className="text-red-500 hover:bg-red-50 border-red-200/50"
         >
           <Trash2 size={16} />
         </Button>
@@ -45,12 +53,20 @@ export const StepForm = ({ step, index, onUpdate, onRemove }: StepFormProps) => 
 
       <div className="grid grid-cols-1 gap-4">
         <div>
-          <Label htmlFor={`${step.id}-title`}>Titel</Label>
+          <Label 
+            htmlFor={`${step.id}-title`} 
+            className="text-gray-700"
+          >
+            Titel
+          </Label>
           <Input
             id={`${step.id}-title`}
             value={step.title}
             onChange={e => onUpdate(step.id, "title", e.target.value)}
-            className="mt-1"
+            className={cn(
+              "mt-1 border-[#9b87f5]/50 focus:border-[#9b87f5] focus:ring-[#9b87f5]/50",
+              "transition-colors duration-300"
+            )}
           />
         </div>
 
