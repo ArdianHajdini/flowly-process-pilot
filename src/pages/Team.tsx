@@ -88,7 +88,7 @@ const Team = () => {
               </div>
 
               <Select
-                value={member.user_roles?.[0]?.role || 'employee'}
+                value={member.user_role || 'employee'}
                 onValueChange={(value: 'admin' | 'manager' | 'employee') => 
                   handleRoleChange(member.id, value)
                 }

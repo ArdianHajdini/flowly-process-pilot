@@ -9,7 +9,7 @@ export type TeamMember = {
   last_name: string | null;
   created_at: string | null;
   updated_at: string | null;
-  user_roles: { role: 'admin' | 'manager' | 'employee' }[];
+  user_role?: string;
 }
 
 export const useTeam = () => {
@@ -19,30 +19,70 @@ export const useTeam = () => {
   const { data: teamMembers, isLoading } = useQuery({
     queryKey: ['team-members'],
     queryFn: async () => {
-      const { data: profiles, error } = await supabase
+      // Zuerst holen wir alle Profile
+      const { data: profiles, error: profilesError } = await supabase
         .from('profiles')
         .select(`
           id,
           first_name,
           last_name,
           created_at,
-          updated_at,
-          user_roles:user_roles(role)
+          updated_at
         `);
 
-      if (error) throw error;
-      return profiles as TeamMember[];
+      if (profilesError) throw profilesError;
+      
+      // Dann holen wir die Rollen für jeden Benutzer separat
+      const membersWithRoles = await Promise.all(
+        profiles.map(async (profile) => {
+          const { data: roleData, error: roleError } = await supabase
+            .from('user_roles')
+            .select('role')
+            .eq('user_id', profile.id)
+            .single();
+          
+          if (roleError && roleError.code !== 'PGRST116') {
+            console.error('Error fetching role:', roleError);
+          }
+
+          return {
+            ...profile,
+            user_role: roleData?.role || 'employee'
+          };
+        })
+      );
+
+      return membersWithRoles as TeamMember[];
     },
   });
 
   const updateRole = useMutation({
     mutationFn: async ({ userId, role }: { userId: string; role: 'admin' | 'manager' | 'employee' }) => {
-      const { error } = await supabase
+      // Überprüfen, ob der Benutzer bereits eine Rolle hat
+      const { data: existingRole, error: checkError } = await supabase
         .from('user_roles')
-        .update({ role })
-        .eq('user_id', userId);
+        .select('id')
+        .eq('user_id', userId)
+        .maybeSingle();
+      
+      if (checkError && checkError.code !== 'PGRST116') throw checkError;
 
-      if (error) throw error;
+      if (existingRole) {
+        // Aktualisieren der bestehenden Rolle
+        const { error } = await supabase
+          .from('user_roles')
+          .update({ role })
+          .eq('user_id', userId);
+
+        if (error) throw error;
+      } else {
+        // Erstellen einer neuen Rolle, falls keine existiert
+        const { error } = await supabase
+          .from('user_roles')
+          .insert({ user_id: userId, role });
+
+        if (error) throw error;
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['team-members'] });
